@@ -1,0 +1,24 @@
+<html>
+    <head>
+    <link rel="stylesheet" type="text/css" href="style.css">
+          <title>Bouncy Ball</title>
+          <script>
+            // shim layer with setTimeout fallback
+            window.requestAnimFrame = (function(){
+              return  window.requestAnimationFrame       ||
+                      window.webkitRequestAnimationFrame ||
+                      window.mozRequestAnimationFrame    ||
+                      window.oRequestAnimationFrame      ||
+                      window.msRequestAnimationFrame     ||
+                      function( callback ){
+                        window.setTimeout(callback, 1000 / 30);
+                      };
+            })();
+          </script>
+    </head>
+    <body style="margin: 0px">
+          <canvas width="400" height="620"
+                  id="myCanvas"></canvas>
+          <script src="script.js"></script>
+    </body>
+</html>
