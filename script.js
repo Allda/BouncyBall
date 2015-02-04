@@ -15,7 +15,7 @@
   // This function is called 60 times each second
 function executeFrame(){
     var i, j, circle;
-    c.fillStyle = 'rgba(255,255,255,1)';
+    c.fillStyle = 'rgba(255,255,255,0.20)';
     c.fillRect(0, 0, canv.width, canv.height);
 
     ball.update();
