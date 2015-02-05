@@ -9,24 +9,29 @@
 
     pads.push(new Pad(150,450));
     pads.push(new Pad(300,300));
-    pads.push(new Pad(200,150));
+    pads.push(new Pad(200,220));
 
     var offset = 0;
+    var animationOffset = 0;
+    var animationStep = 0;
     var lastBounce = canv.height;
 
 
   // This function is called 60 times each second
 function executeFrame(){
     var i, j, circle;
-    c.fillStyle = 'rgba(255,255,255,0.20)';
+    c.fillStyle = 'rgba(255,255,255,1)';
     c.fillRect(0, 0, canv.width, canv.height);
 
     ball.update();
     ball.bounce(pads);
-    ball.draw(offset);
+    // count animation step and add to animation offset
+    animationStep = ball.countMovePerFrame(offset, animationOffset);
+    animationOffset += animationStep;
+    ball.draw(animationOffset);
 
     for (var i = 0; i < pads.length; i++) {
-        pads[i].draw(offset);
+        pads[i].draw(animationOffset);
     };
 
 
@@ -57,7 +62,7 @@ function Pad(x, y){
 
     this.draw = function(offset){
         c.beginPath();
-        console.log("Pad at: " + this.y + ", offset: " +offset)
+        //console.log("Pad at: " + this.y + ", offset: " +offset)
         c.rect(this.x, this.y + offset, this.width, this.height);
         c.closePath();
         c.fillStyle = 'black';
@@ -86,11 +91,20 @@ function Ball(x, y, radius){
 
     this.bounce = function(pads){
         // botom
-        if(this.y + this.radius > canv.height){
-          this.y = canv.height - this.radius;
-          this.vy = -12;
+        if(animationOffset == 0){
+            if(this.y + this.radius > canv.height){
+              this.y = canv.height - this.radius;
+              this.vy = -12;
+            }
         }
+        else{
+            if(this.y + this.radius + animationOffset > canv.height){
+                console.log("Game over");
+                this.y = canv.height - this.radius - animationOffset;
+                this.vy = -12;
+            }
             // right
+        }
         if(this.x + this.radius > canv.width){
             this.x = canv.width - this.radius;
             this.vx = -Math.abs(this.vx);
@@ -110,10 +124,18 @@ function Ball(x, y, radius){
                 if(this.x > pads[i].x && this.x < pads[i].x + pads[i].width)
                     if(this.y + this.radius > pads[i].y && this.y + this.radius < pads[i].y + pads[i].height){
                         this.vy = -12;
-                        offset = lastBounce - pads[i].y -50;
+                        // count new offset after bounce ball to pad
+                        // every frame animation count new animation step
+                        offset = lastBounce - pads[i].y - 100;
+                        //animationStep = this.countMovePerFrame(offset,animationOffset);
                     }
             };
         }
+    }
+
+    this.countMovePerFrame = function(offset, animationOffset){
+        var diff = offset - animationOffset;
+        return diff * 0.05; // 5% of difference betwen real offset and shown offset
     }
     this.update = function(){
         this.x += this.vx;
@@ -134,7 +156,7 @@ function Ball(x, y, radius){
             this.vx -= 0.75;
         if(this.vx < -5)
             this.vx = -5;
-        console.log("Left " + this.vx);
+        //console.log("Left " + this.vx);
         //window.clearTimeout(this.timeOut);
         //this.timeOut = setTimeOut(this.slowDown(),500)
     }
@@ -146,7 +168,7 @@ function Ball(x, y, radius){
             this.vx += 0.75;
         if(this.vx > 5)
             this.vx = 5;
-        console.log("Right " + this.vx);
+        //console.log("Right " + this.vx);
         //window.clearTimeout(this.timeOut);
         //this.timeOut = setTimeOut(this.slowDown(),500)
     }
