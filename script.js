@@ -11,6 +11,9 @@
     pads.push(new Pad(300,300));
     pads.push(new Pad(200,150));
 
+    var offset = 0;
+    var lastBounce = canv.height;
+
 
   // This function is called 60 times each second
 function executeFrame(){
@@ -20,10 +23,10 @@ function executeFrame(){
 
     ball.update();
     ball.bounce(pads);
-    ball.draw();
+    ball.draw(offset);
 
     for (var i = 0; i < pads.length; i++) {
-        pads[i].draw();
+        pads[i].draw(offset);
     };
 
 
@@ -52,9 +55,10 @@ function Pad(x, y){
     this.width = 100;
     this.height = 15;
 
-    this.draw = function(){
+    this.draw = function(offset){
         c.beginPath();
-        c.rect(this.x, this.y, this.width, this.height);
+        console.log("Pad at: " + this.y + ", offset: " +offset)
+        c.rect(this.x, this.y + offset, this.width, this.height);
         c.closePath();
         c.fillStyle = 'black';
         c.fill();
@@ -72,9 +76,9 @@ function Ball(x, y, radius){
     this.dampening = 0.99;
     this.timeOut;
 
-    this.draw = function(){
+    this.draw = function(offset){
         c.beginPath();
-        c.arc(this.x, this.y, this.radius, 0, 2*Math.PI);
+        c.arc(this.x, this.y + offset, this.radius, 0, 2*Math.PI);
         c.closePath();
         c.fillStyle = 'black';
         c.fill();
@@ -106,6 +110,7 @@ function Ball(x, y, radius){
                 if(this.x > pads[i].x && this.x < pads[i].x + pads[i].width)
                     if(this.y + this.radius > pads[i].y && this.y + this.radius < pads[i].y + pads[i].height){
                         this.vy = -12;
+                        offset = lastBounce - pads[i].y -50;
                     }
             };
         }
