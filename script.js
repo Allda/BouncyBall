@@ -7,11 +7,9 @@
 
     var pads = [];
 
-    pads.push(new Pad(150,450));
-    pads.push(new Pad(300,300));
-    pads.push(new Pad(200,220));
 
-    var offset = 0;
+
+        var offset = 0;
     var animationOffset = 0;
     var animationStep = 0;
     var lastBounce = canv.height;
@@ -39,6 +37,28 @@ function executeFrame(){
     requestAnimFrame(executeFrame);
 }
 
+function initializePads(){
+    last = canv.height;
+    for (var i = 0; i < 10; i++) {
+        var dist = Math.random() * 50 +150;
+        console.log(dist);
+        if(pads.length == 0){
+            var nPad = new Pad(Math.random()*(canv.width-100),canv.height-dist);
+            pads.push(nPad);
+            last = nPad.y;
+        }
+        else{
+            var nPad = new Pad(Math.random()*(canv.width-100),last-dist);
+            pads.push(nPad);
+            last = nPad.y;
+        }
+
+    }
+}
+
+Array.prototype.last = function () {
+  return this[this.length - 1];
+};
 
 function mouseListener(e){
     console.log(e.keyCode);
@@ -178,7 +198,7 @@ function Ball(x, y, radius){
     }
 }
 
-
+    initializePads();
     // Start animation
     executeFrame();
 
