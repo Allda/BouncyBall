@@ -40,7 +40,7 @@ function executeFrame(){
 function initializePads(){
     last = canv.height;
     for (var i = 0; i < 10; i++) {
-        var dist = Math.random() * 50 +150;
+        var dist = getRandomPadStep();
         console.log(dist);
         if(pads.length == 0){
             var nPad = new Pad(Math.random()*(canv.width-100),canv.height-dist);
@@ -54,6 +54,10 @@ function initializePads(){
         }
 
     }
+}
+
+function getRandomPadStep(){
+    return Math.random() * 50 +150;
 }
 
 Array.prototype.last = function () {
@@ -79,6 +83,7 @@ function Pad(x, y){
 
     this.width = 100;
     this.height = 15;
+    this.steped = false;
 
     this.draw = function(offset){
         c.beginPath();
@@ -148,6 +153,17 @@ function Ball(x, y, radius){
                         // every frame animation count new animation step
                         offset = lastBounce - pads[i].y - 100;
                         //animationStep = this.countMovePerFrame(offset,animationOffset);
+
+                        if(!pads[i].steped){
+                            var lastPad = pads.last();
+                            var nPadStep = getRandomPadStep();
+                            var nPad = new Pad(Math.random()*(canv.width-100),lastPad.y-nPadStep);
+                            pads.push(nPad);
+                            pads[i].steped = true;
+                            if(pads.length > 15)
+                                pads.shift();
+
+                        }
                     }
             };
         }
