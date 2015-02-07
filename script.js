@@ -7,12 +7,15 @@
 
     var pads = [];
 
+    var bg = new Image();
+    bg.src = 'img/bg2.jpg';
 
-
-        var offset = 0;
+    var offset = 0;
     var animationOffset = 0;
     var animationStep = 0;
     var lastBounce = canv.height;
+
+    var score = 0;
 
 
   // This function is called 60 times each second
@@ -20,6 +23,8 @@ function executeFrame(){
     var i, j, circle;
     c.fillStyle = 'rgba(255,255,255,1)';
     c.fillRect(0, 0, canv.width, canv.height);
+    c.drawImage(bg,0,0);
+    c.drawImage(bg,0,409);
 
     ball.update();
     ball.bounce(pads);
@@ -31,6 +36,8 @@ function executeFrame(){
     for (var i = 0; i < pads.length; i++) {
         pads[i].draw(animationOffset);
     };
+    c.font = "30px Helvetica";
+    c.fillText('Score: '+score.toString(),10,50);
 
 
     // Schedule the next frame
@@ -90,7 +97,7 @@ function Pad(x, y){
         //console.log("Pad at: " + this.y + ", offset: " +offset)
         c.rect(this.x, this.y + offset, this.width, this.height);
         c.closePath();
-        c.fillStyle = 'black';
+        c.fillStyle = 'white';
         c.fill();
     }
 
@@ -110,7 +117,7 @@ function Ball(x, y, radius){
         c.beginPath();
         c.arc(this.x, this.y + offset, this.radius, 0, 2*Math.PI);
         c.closePath();
-        c.fillStyle = 'black';
+        c.fillStyle = 'cyan';
         c.fill();
     }
 
@@ -162,6 +169,7 @@ function Ball(x, y, radius){
                             pads[i].steped = true;
                             if(pads.length > 15)
                                 pads.shift();
+                            score++;
 
                         }
                     }
