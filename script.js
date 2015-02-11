@@ -2,100 +2,115 @@
     var canv = document.getElementById('myCanvas'),
     c = canv.getContext('2d');
 
+    /* flip y coordinate
+    [0,height]  [width,height]
+    +-----------+
+    |           |
+    |           |
+    |           |
+    |           |
+    |           |
+    |           |
+    |           |
+    +-----------+
+    [0;0]       [width,0]
+    */
+    c.translate(0,canv.height); 
+    c.scale(1,-1);
+
     window.addEventListener('keydown',mouseListener,false);
-    var ball = new Ball(canv.width/2-20,canv.height-20,20);
 
-    var pads = [];
+    var game = new Game();
+    game.initializePads();
 
-    var bg = new Image();
-    bg.src = 'img/bg2.jpg';
-
-    var offset = 0;
-    var animationOffset = 0;
-    var animationStep = 0;
-    var lastBounce = canv.height;
-
-    var score = 0;
-    var gameStatus = 'start';
+    /*var bg = new Image();
+    bg.src = 'img/bg2.jpg';*/
 
 
   // This function is called 60 times each second
 function executeFrame(){
-    var i, j, circle;
-    c.fillStyle = 'rgba(255,255,255,1)';
-    c.fillRect(0, 0, canv.width, canv.height);
-    c.drawImage(bg,0,0);
-    c.drawImage(bg,0,409);
 
-    if(gameStatus != 'Over'){
-        ball.update();
-        if(ball.bounce(pads) === 'GameOver'){
-            gameStatus = 'Over';
-        }
-
-        // count animation step and add to animation offset
-        animationStep = ball.countMovePerFrame(offset, animationOffset);
-        animationOffset += animationStep;
-
-        
-    
-    }
-    else{
-        c.font = "100px Helvetica";
-        c.fillStyle = 'rgba(120,120,0,1)';
-        c.fillText('Game\nOver',50, canv.height/2);
-    }
-    ball.draw(animationOffset);
-
-    for (var i = 0; i < pads.length; i++) {
-        pads[i].draw(animationOffset);
-    };
-    c.font = "30px Helvetica";
-
-    c.fillText('Score: '+score.toString(),10,50);
+    game.update();
+    game.draw();
 
 
     // Schedule the next frame
     requestAnimFrame(executeFrame);
 }
 
-function initializePads(){
-    last = canv.height;
-    for (var i = 0; i < 10; i++) {
-        var dist = getRandomPadStep();
-        console.log(dist);
-        if(pads.length == 0){
-            var nPad = new Pad(Math.random()*(canv.width-100),canv.height-dist);
-            pads.push(nPad);
-            last = nPad.y;
-        }
-        else{
-            var nPad = new Pad(Math.random()*(canv.width-100),last-dist);
-            pads.push(nPad);
-            last = nPad.y;
-        }
+function Game(){
+    this.ball = new Ball(canv.width/2-20,30,20);
+    this.offset = 0;
+    this.animationOffset = 0;
+    this.animationStep = 0;
+    this.lastBounce = 0;
+    this.score = 0;
+    this.pads = [];
 
+    this.initializePads = function(){
+        var last = 0;
+        for (var i = 0; i < 2; i++) {
+            var dist = this.getRandomPadStep();
+
+            var nPad = new Pad(Math.random()*(canv.width-100),last+dist);
+            this.pads.push(nPad);
+            last = nPad.y;
+
+
+        }
+    }
+
+    this.getRandomPadStep = function(){
+        return Math.random() * 50 +150;
+    }
+
+    this.update = function(){
+        this.ball.update();
+        this.ball.bounce(this.pads);
+
+        //every frame update offset and get offset step and add to animationOffset
+        this.animationStep = this.countMovePerFrame(this.offset, this.animationOffset);
+        this.animationOffset += this.animationStep;
+
+        
+    }
+
+    this.draw = function(){
+        c.fillStyle = 'rgba(255,255,255,0.8)';
+        c.fillRect(0, 0, canv.width, canv.height);
+
+        for (var i = 0; i < this.pads.length; i++) {
+            this.pads[i].draw(this.animationOffset);
+        };
+
+        this.ball.draw();
+
+        /*c.font = "30px Helvetica";
+
+        c.fillText('Score: '+this.score.toString(),10,50);*/
+    }
+
+    this.countMovePerFrame = function(offset, animationOffset){
+        var diff = this.offset - this.animationOffset;
+        return diff * 0.05; // 5% of difference betwen real offset and shown offset
     }
 }
 
-function getRandomPadStep(){
-    return Math.random() * 50 +150;
-}
+
 
 Array.prototype.last = function () {
   return this[this.length - 1];
 };
 
 function mouseListener(e){
-    console.log(e.keyCode);
     var code = e.keyCode;
     // left
     if(code === 37){
-        ball.moveLeft();
+        game.ball.moveLeft();
     }
     // right
     else if(code === 39){
-        ball.moveRight()
+        game.ball.moveRight()
     }
 }
 
@@ -110,9 +125,9 @@ function Pad(x, y){
     this.draw = function(offset){
         c.beginPath();
         //console.log("Pad at: " + this.y + ", offset: " +offset)
-        c.rect(this.x, this.y + offset, this.width, this.height);
+        c.rect(this.x, this.y - offset, this.width, this.height);
         c.closePath();
-        c.fillStyle = 'white';
+        c.fillStyle = 'black';
         c.fill();
     }
 
@@ -124,15 +139,12 @@ function Ball(x, y, radius){
     this.vx = 0;
     this.vy = 0;
     this.radius = radius;
-    this.gravity = 0.25;
+    this.gravity = -0.25;
     this.dampening = 0.99;
-    this.timeOut;
-    this.state = 'start';
-    this.fallingEdge = undefined;
 
     this.draw = function(offset){
         c.beginPath();
-        c.arc(this.x, this.y + offset, this.radius, 0, 2*Math.PI);
+        c.arc(this.x, this.y - game.animationOffset, this.radius, 0, 2*Math.PI);
         c.closePath();
         c.fillStyle = 'cyan';
         c.fill();
@@ -140,84 +152,45 @@ function Ball(x, y, radius){
 
     this.bounce = function(pads){
         // botom
-        if(animationOffset == 0){
-            if(this.y + this.radius > canv.height){
-              this.y = canv.height - this.radius;
-              this.vy = -12;
-                
-            }
-        }
-        else{
-            if(this.y + this.radius + animationOffset > canv.height){
-                console.log("Game over");
-                this.y = canv.height - this.radius - animationOffset;
-                this.vy = -12;
-                return 'GameOver';
-            }
-            // right
+        if(this.y - this.radius < 0){
+              this.y =  this.radius;
+              this.vy = 12;
         }
         if(this.x + this.radius > canv.width){
             this.x = canv.width - this.radius;
             this.vx = -Math.abs(this.vx);
         }
-            // top
-        /*if(this.y - this.radius < 0){
-            this.y = this.radius;
-            this.vy = Math.abs(this.vy);
-        }*/
-            // left
+        // left
         if(this.x - this.radius < 0){
             this.x = this.radius;
             this.vx = Math.abs(this.vx);
         }
-        if(this.vy >= 0){
-            for (var i = 0; i < pads.length; i++) {
-                if(this.x > pads[i].x && this.x < pads[i].x + pads[i].width)
-                    if(this.y + this.radius > pads[i].y && this.y + this.radius < pads[i].y + pads[i].height){
-                        if(this.state == 'start')
-                            this.state = 'inGame';
-
-                        this.vy = -12;
+        if(this.vy <= 0){ // ball is falling down
+            for (var i = 0; i < game.pads.length; i++) {
+                if(this.x > game.pads[i].x && this.x < game.pads[i].x + game.pads[i].width){
+                    //console.log('yes');
+                    if(this.y - this.radius < game.pads[i].y +game.pads[i].height && this.y - this.radius > game.pads[i].y){
+                        this.vy = 12;
                         // count new offset after bounce ball to pad
                         // every frame animation count new animation step
-                        offset = lastBounce - pads[i].y - 100;
+                        game.offset = game.lastBounce + game.pads[i].y + game.pads[i].height - 100;
                         //animationStep = this.countMovePerFrame(offset,animationOffset);
 
-                        if(!pads[i].steped){
-                            var lastPad = pads.last();
-                            var nPadStep = getRandomPadStep();
-                            var nPad = new Pad(Math.random()*(canv.width-100),lastPad.y-nPadStep);
-                            pads.push(nPad);
-                            pads[i].steped = true;
-                            if(pads.length > 15)
-                                pads.shift();
+                        if(!game.pads[i].steped){
+                            var lastPad = game.pads.last();
+                            var nPadStep = game.getRandomPadStep();
+                            var nPad = new Pad(Math.random()*(canv.width-100),lastPad.y+nPadStep);
+                            game.pads.push(nPad);
+                            game.pads[i].steped = true;
+                            if(game.pads.length > 15)
+                                game.pads.shift();
                             score++;
 
                         }
                     }
+                }
             };
-            if(this.state != 'start'){
-                if(this.state == 'falling'){
-                    
-                    console.log(this.fallingEdge + 200, this.y + animationOffset);
-                    if(this.fallingEdge - 300 > this.y + animationOffset){
-                        console.log("Padam");
-                        
-                    }
-                    else{
-                        console.log('shift');
-                        offset = this.y + animationOffset-50;
-                    }
-                }
-                if(this.y + animationOffset > canv.height-75 && this.state == 'inGame'){
-                    this.state = 'falling';
-                    this.fallingEdge = this.y + animationOffset;
-                    //console.log("Je pod");
-                    offset = this.y + animationOffset-50;
-                    console.log('Offset: '+offset);
-                }
-            }
-            console.log(this.state);
+
         }
     }
 
@@ -244,9 +217,6 @@ function Ball(x, y, radius){
             this.vx -= 0.75;
         if(this.vx < -5)
             this.vx = -5;
-        //console.log("Left " + this.vx);
-        //window.clearTimeout(this.timeOut);
-        //this.timeOut = setTimeOut(this.slowDown(),500)
     }
     this.moveRight = function(){
         if(this.vx < 0){
@@ -256,17 +226,11 @@ function Ball(x, y, radius){
             this.vx += 0.75;
         if(this.vx > 5)
             this.vx = 5;
-        //console.log("Right " + this.vx);
-        //window.clearTimeout(this.timeOut);
-        //this.timeOut = setTimeOut(this.slowDown(),500)
+
     }
 
-    this.slowDown = function(){
-        console.log("slowDown");
-    }
 }
 
-    initializePads();
     // Start animation
     executeFrame();
 
