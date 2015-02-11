@@ -16,6 +16,7 @@
     var lastBounce = canv.height;
 
     var score = 0;
+    var gameStatus = 'start';
 
 
   // This function is called 60 times each second
@@ -26,17 +27,31 @@ function executeFrame(){
     c.drawImage(bg,0,0);
     c.drawImage(bg,0,409);
 
-    ball.update();
-    ball.bounce(pads);
-    // count animation step and add to animation offset
-    animationStep = ball.countMovePerFrame(offset, animationOffset);
-    animationOffset += animationStep;
+    if(gameStatus != 'Over'){
+        ball.update();
+        if(ball.bounce(pads) === 'GameOver'){
+            gameStatus = 'Over';
+        }
+
+        // count animation step and add to animation offset
+        animationStep = ball.countMovePerFrame(offset, animationOffset);
+        animationOffset += animationStep;
+
+        
+    
+    }
+    else{
+        c.font = "100px Helvetica";
+        c.fillStyle = 'rgba(120,120,0,1)';
+        c.fillText('Game\nOver',50, canv.height/2);
+    }
     ball.draw(animationOffset);
 
     for (var i = 0; i < pads.length; i++) {
         pads[i].draw(animationOffset);
     };
     c.font = "30px Helvetica";
+
     c.fillText('Score: '+score.toString(),10,50);
 
 
@@ -112,6 +127,8 @@ function Ball(x, y, radius){
     this.gravity = 0.25;
     this.dampening = 0.99;
     this.timeOut;
+    this.state = 'start';
+    this.fallingEdge = undefined;
 
     this.draw = function(offset){
         c.beginPath();
@@ -127,6 +144,7 @@ function Ball(x, y, radius){
             if(this.y + this.radius > canv.height){
               this.y = canv.height - this.radius;
               this.vy = -12;
+                
             }
         }
         else{
@@ -134,6 +152,7 @@ function Ball(x, y, radius){
                 console.log("Game over");
                 this.y = canv.height - this.radius - animationOffset;
                 this.vy = -12;
+                return 'GameOver';
             }
             // right
         }
@@ -155,6 +174,9 @@ function Ball(x, y, radius){
             for (var i = 0; i < pads.length; i++) {
                 if(this.x > pads[i].x && this.x < pads[i].x + pads[i].width)
                     if(this.y + this.radius > pads[i].y && this.y + this.radius < pads[i].y + pads[i].height){
+                        if(this.state == 'start')
+                            this.state = 'inGame';
+
                         this.vy = -12;
                         // count new offset after bounce ball to pad
                         // every frame animation count new animation step
@@ -174,6 +196,28 @@ function Ball(x, y, radius){
                         }
                     }
             };
+            if(this.state != 'start'){
+                if(this.state == 'falling'){
+                    
+                    console.log(this.fallingEdge + 200, this.y + animationOffset);
+                    if(this.fallingEdge - 300 > this.y + animationOffset){
+                        console.log("Padam");
+                        
+                    }
+                    else{
+                        console.log('shift');
+                        offset = this.y + animationOffset-50;
+                    }
+                }
+                if(this.y + animationOffset > canv.height-75 && this.state == 'inGame'){
+                    this.state = 'falling';
+                    this.fallingEdge = this.y + animationOffset;
+                    //console.log("Je pod");
+                    offset = this.y + animationOffset-50;
+                    console.log('Offset: '+offset);
+                }
+            }
+            console.log(this.state);
         }
     }
 
