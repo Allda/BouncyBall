@@ -114,26 +114,33 @@ function mouseListener(e){
     }
 }
 
-function Pad(x, y){
+function Pad(x, y, broken){
     this.x = x;
     this.y = y;
 
     this.width = 100;
     this.height = 15;
     this.steped = false;
-    this.angle = 0;
+
+    this.damage = 1;
+    this.broken = broken;
 
     this.draw = function(offset){
         c.beginPath();
-        //console.log("Pad at: " + this.y + ", offset: " +offset)
-        //c.save();
-        //c.rotate(this.angle*Math.PI/180);
         c.rect(this.x, this.y - offset, this.width, this.height);
         c.closePath();
-        c.fillStyle = 'black';
+        c.fillStyle = this.getColor();
         c.fill();
-        //c.restore();
-        //this.angle++;
+
+    }
+
+    this.getColor = function(){
+        if(this.damage == 0)
+            return 'rgba(150,150,150,1)';
+        else if(this.damage == 1)
+            return 'rgba(0,0,0,1)';
+        else
+            return 'rgba(0,0,0,1)';
     }
 
 }
@@ -148,6 +155,7 @@ function Ball(x, y, size){
     //this.radius = radius;
     this.gravity = -0.25;
     this.dampening = 0.99;
+    this.originalvy = 12;
     this.angle = 0;
     this.rotateDirection = '';
 
@@ -166,23 +174,22 @@ function Ball(x, y, size){
         if(this.state == 'rotate'){
             c.restore();
             if(this.rotateDirection == 'left')
-                this.angle += 2;
+                this.angle += 4;
             else
-                this.angle -= 2;
-            if(this.angle == 90 || this.angle == -90){
+                this.angle -= 4;
+            if(this.angle == 180 || this.angle == -180){
 
                 this.angle = 0;
                 this.state = 'normal';
             }
         }
-        console.log(this.state, this.angle, this.rotateDirection, this.vx);
     }
 
     this.bounce = function(pads){
         // botom
         if(this.y < 0){
               this.y =  0;
-              this.vy = 12;
+              this.vy = this.originalvy;
         }
         if(this.x + this.size > canv.width){
             this.x = canv.width - this.size;
@@ -195,24 +202,38 @@ function Ball(x, y, size){
         }
         if(this.vy <= 0){ // ball is falling down
             for (var i = 0; i < pads.length; i++) {
-                if(this.x + this.size > pads[i].x && this.x < pads[i].x + pads[i].width){
+                var p = pads[i];
+                if(this.x + this.size > p.x && this.x < p.x + p.width){
                     //console.log('yes');
-                    if(this.y < pads[i].y +pads[i].height && this.y  > pads[i].y){
-                        this.vy = 12;
+                    if(this.y < p.y +p.height && this.y  > p.y){
+                        this.vy = this.originalvy;
                         this.state = 'rotate';
                         if(this.vx < 0)
                             this.rotateDirection = 'left';
                         else
                             this.rotateDirection = 'right';
+
+                        
                         // count new offset after bounce ball to pad
                         // every frame animation count new animation step
                         game.offset = game.lastBounce + game.pads[i].y + game.pads[i].height - 100;
                         //animationStep = this.countMovePerFrame(offset,animationOffset);
+                        if(p.broken){
+                            p.damage--;
+                            if(p.damage < 0){
+                                var index = pads.indexOf(p);
+                                if(index > -1)
+                                    pads.splice(index,1);
+                            }
+                        }
 
                         if(!game.pads[i].steped){
                             var lastPad = game.pads.last();
                             var nPadStep = game.getRandomPadStep();
-                            var nPad = new Pad(Math.random()*(canv.width-100),lastPad.y+nPadStep);
+                            var broken = false;
+                            if(Math.random() > 0.8)
+                                broken = true
+                            var nPad = new Pad(Math.random()*(canv.width-100),lastPad.y+nPadStep, broken);
                             game.pads.push(nPad);
                             game.pads[i].steped = true;
                             if(game.pads.length > 15)
