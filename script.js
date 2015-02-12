@@ -39,7 +39,7 @@ function executeFrame(){
 }
 
 function Game(){
-    this.ball = new Ball(canv.width/2-20,30,20);
+    this.ball = new Ball(canv.width/2-20,30,30);
     this.offset = 0;
     this.animationOffset = 0;
     this.animationStep = 0;
@@ -121,56 +121,89 @@ function Pad(x, y){
     this.width = 100;
     this.height = 15;
     this.steped = false;
+    this.angle = 0;
 
     this.draw = function(offset){
         c.beginPath();
         //console.log("Pad at: " + this.y + ", offset: " +offset)
+        //c.save();
+        //c.rotate(this.angle*Math.PI/180);
         c.rect(this.x, this.y - offset, this.width, this.height);
         c.closePath();
         c.fillStyle = 'black';
         c.fill();
+        //c.restore();
+        //this.angle++;
     }
 
 }
 
-function Ball(x, y, radius){
+function Ball(x, y, size){
     this.x = x;
     this.y = y;
     this.vx = 0;
     this.vy = 0;
-    this.radius = radius;
+    this.size = size
+    this.state = 'normal';
+    //this.radius = radius;
     this.gravity = -0.25;
     this.dampening = 0.99;
+    this.angle = 0;
+    this.rotateDirection = '';
 
     this.draw = function(offset){
         c.beginPath();
-        c.arc(this.x, this.y - game.animationOffset, this.radius, 0, 2*Math.PI);
+        if(this.state == 'rotate'){
+            c.save();
+            c.translate(this.x + this.size/2,this.y- game.animationOffset +this.size/2);
+            c.rotate(this.angle*Math.PI/180);
+            c.translate(-(this.x + this.size/2),-(this.y- game.animationOffset +this.size/2));
+        }
+        c.rect(this.x, this.y - game.animationOffset, this.size, this.size);
         c.closePath();
         c.fillStyle = 'cyan';
         c.fill();
+        if(this.state == 'rotate'){
+            c.restore();
+            if(this.rotateDirection == 'left')
+                this.angle += 2;
+            else
+                this.angle -= 2;
+            if(this.angle == 90 || this.angle == -90){
+
+                this.angle = 0;
+                this.state = 'normal';
+            }
+        }
+        console.log(this.state, this.angle, this.rotateDirection, this.vx);
     }
 
     this.bounce = function(pads){
         // botom
-        if(this.y - this.radius < 0){
-              this.y =  this.radius;
+        if(this.y < 0){
+              this.y =  0;
               this.vy = 12;
         }
-        if(this.x + this.radius > canv.width){
-            this.x = canv.width - this.radius;
+        if(this.x + this.size > canv.width){
+            this.x = canv.width - this.size;
             this.vx = -Math.abs(this.vx);
         }
         // left
-        if(this.x - this.radius < 0){
-            this.x = this.radius;
+        if(this.x < 0){
+            this.x = 0;
             this.vx = Math.abs(this.vx);
         }
         if(this.vy <= 0){ // ball is falling down
-            for (var i = 0; i < game.pads.length; i++) {
-                if(this.x > game.pads[i].x && this.x < game.pads[i].x + game.pads[i].width){
+            for (var i = 0; i < pads.length; i++) {
+                if(this.x + this.size > pads[i].x && this.x < pads[i].x + pads[i].width){
                     //console.log('yes');
-                    if(this.y - this.radius < game.pads[i].y +game.pads[i].height && this.y - this.radius > game.pads[i].y){
+                    if(this.y < pads[i].y +pads[i].height && this.y  > pads[i].y){
                         this.vy = 12;
+                        this.state = 'rotate';
+                        if(this.vx < 0)
+                            this.rotateDirection = 'left';
+                        else
+                            this.rotateDirection = 'right';
                         // count new offset after bounce ball to pad
                         // every frame animation count new animation step
                         game.offset = game.lastBounce + game.pads[i].y + game.pads[i].height - 100;
@@ -184,7 +217,7 @@ function Ball(x, y, radius){
                             game.pads[i].steped = true;
                             if(game.pads.length > 15)
                                 game.pads.shift();
-                            score++;
+                            game.score++;
 
                         }
                     }
@@ -211,7 +244,7 @@ function Ball(x, y, radius){
     }
     this.moveLeft = function(){
         if(this.vx > 0){
-            this.vx = 0.0;
+            this.vx = -0.75;
         }
         else
             this.vx -= 0.75;
@@ -220,7 +253,7 @@ function Ball(x, y, radius){
     }
     this.moveRight = function(){
         if(this.vx < 0){
-            this.vx = 0.0;
+            this.vx = 0.75;
         }
         else
             this.vx += 0.75;
