@@ -159,6 +159,9 @@ function Ball(x, y, size){
     this.angle = 0;
     this.rotateDirection = '';
 
+    this.snd = new Audio("sound/BounceYoFrankie.wav"); // buffers automatically when created
+
+
     this.draw = function(offset){
         c.beginPath();
         if(this.state == 'rotate'){
@@ -212,8 +215,9 @@ function Ball(x, y, size){
                             this.rotateDirection = 'left';
                         else
                             this.rotateDirection = 'right';
+                        this.snd.curentTime = 0;
+                        this.snd.play();
 
-                        
                         // count new offset after bounce ball to pad
                         // every frame animation count new animation step
                         game.offset = game.lastBounce + game.pads[i].y + game.pads[i].height - 100;
