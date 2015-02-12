@@ -1,3 +1,4 @@
+// version with ball
 (function(){
     var canv = document.getElementById('myCanvas'),
     c = canv.getContext('2d');
