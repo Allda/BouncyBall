@@ -23,15 +23,20 @@
     var game = new Game();
     game.initializePads();
 
+
     /*var bg = new Image();
     bg.src = 'img/bg2.jpg';*/
 
 
   // This function is called 60 times each second
 function executeFrame(){
-
-    game.update();
-    game.draw();
+    if(game.gameStatus == 'playing'){
+        game.update();
+        game.draw();
+    }
+    if(game.gameStatus == 'gameOver'){
+        game.drawResult();
+    }
 
 
     // Schedule the next frame
@@ -46,6 +51,8 @@ function Game(){
     this.lastBounce = 0;
     this.score = 0;
     this.pads = [];
+    this.gameStatus = 'playing';
+    this.resultBG = false;
 
     this.initializePads = function(){
         var last = 0;
@@ -66,7 +73,8 @@ function Game(){
 
     this.update = function(){
         this.ball.update();
-        this.ball.bounce(this.pads);
+        if(this.ball.bounce(this.pads) == 'gameOver')
+            this.gameStatus = 'gameOver';
 
         //every frame update offset and get offset step and add to animationOffset
         this.animationStep = this.countMovePerFrame(this.offset, this.animationOffset);
@@ -94,6 +102,15 @@ function Game(){
         var diff = this.offset - this.animationOffset;
         return diff * 0.05; // 5% of difference betwen real offset and shown offset
     }
+
+    this.drawResult = function(){
+        if(!this.resultBG){
+            c.fillStyle = 'rgba(255,0,0,0.5)';
+            c.fillRect(0, 0, canv.width, canv.height);
+            this.resultBG = true;
+            $("#score").fadeToggle('slow');
+        }
+    }
 }
 
 
@@ -112,6 +129,7 @@ function mouseListener(e){
     else if(code === 39){
         game.ball.moveRight()
     }
+
 }
 
 function Pad(x, y, broken){
@@ -190,9 +208,16 @@ function Ball(x, y, size){
 
     this.bounce = function(pads){
         // botom
-        if(this.y < 0){
-              this.y =  0;
-              this.vy = this.originalvy;
+        if(game.offset == 0){
+            if(this.y < 0){
+                  this.y =  0;
+                  this.vy = this.originalvy;
+            }
+        }
+        else{
+            if(this.y + this.size - game.animationOffset < -10){
+                  return 'gameOver';
+            }
         }
         if(this.x + this.size > canv.width){
             this.x = canv.width - this.size;

@@ -9,4 +9,15 @@ body{
 	background: #fff;
 	margin: 10 auto;
 	display: block;
+	z-index: -1;
+}
+#score {
+  background-color:#aa00aa;
+  margin-top:-500px;
+  width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+  z-index:1;
+  position: relative;
+  display: none;
 }
