@@ -132,7 +132,7 @@ function mouseListener(e){
 
 }
 
-c.addEventListener('touchmove', function(event) {
+canv.addEventListener('touchmove', function(event) {
   for (var i = 0; i < event.touches.length; i++) {
     var touch = event.touches[i];
     ctx.beginPath();
