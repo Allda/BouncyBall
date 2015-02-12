@@ -132,6 +132,16 @@ function mouseListener(e){
 
 }
 
+c.addEventListener('touchmove', function(event) {
+  for (var i = 0; i < event.touches.length; i++) {
+    var touch = event.touches[i];
+    ctx.beginPath();
+    ctx.arc(touch.pageX, touch.pageY, 20, 0, 2*Math.PI, true);
+    ctx.fill();
+    ctx.stroke();
+  }
+}, false);
+
 function Pad(x, y, broken){
     this.x = x;
     this.y = y;
