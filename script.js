@@ -20,9 +20,10 @@
 
     window.addEventListener('keydown',mouseListener,false);
 
+
+
     var game = new Game();
     game.initializePads();
-
 
     /*var bg = new Image();
     bg.src = 'img/bg2.jpg';*/
@@ -36,6 +37,8 @@ function executeFrame(){
     }
     if(game.gameStatus == 'gameOver'){
         game.drawResult();
+        $("#score").fadeIn('slow');
+
     }
 
 
@@ -108,8 +111,23 @@ function Game(){
             c.fillStyle = 'rgba(255,0,0,0.5)';
             c.fillRect(0, 0, canv.width, canv.height);
             this.resultBG = true;
-            $("#score").fadeToggle('slow');
+            //$("#score").fadeToggle('slow');
+            $(".players").append('<div class="player">Ales</div> <div class="score">150</div>');
+
         }
+    }
+
+    this.restart = function() {
+        this.ball = new Ball(canv.width/2-20,30,30);
+        this.offset = 0;
+        this.animationOffset = 0;
+        this.animationStep = 0;
+        this.lastBounce = 0;
+        this.score = 0;
+        this.pads = [];
+        this.gameStatus = 'playing';
+        this.resultBG = false;
+        this.initializePads();
     }
 }
 
@@ -129,6 +147,9 @@ function mouseListener(e){
     else if(code === 39){
         game.ball.moveRight()
     }
+    else
+        game.restart();
+    
 
 }
 
@@ -323,8 +344,17 @@ function Ball(x, y, size){
     }
 
 }
-
+    $(document).ready(function(){
+        console.log($('#restart').html());
+        $("#restart").click(function(){
+            console.log("Restart");
+            $("#score").fadeOut('slow');
+            game.restart();
+        });
+    })
+    
     // Start animation
     executeFrame();
+
 
 })();

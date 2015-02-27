@@ -2,6 +2,7 @@ body{
 	margin: 0;
 	padding: 0;
 	background: #666;
+	color: #fff;
 }
 
 #myCanvas {
@@ -12,7 +13,7 @@ body{
 	z-index: -1;
 }
 #score {
-  background-color:#aa00aa;
+  background-color:#3E30D9;
   margin-top:-500px;
   width: 300px;
   margin-left: auto;
@@ -20,4 +21,45 @@ body{
   z-index:1;
   position: relative;
   display: none;
+  border: 2px solid #fff;
+  border-radius: 7px;
+}
+.message{
+	margin: 10px auto;
+	width: 250px;
+	display: block;
+	font-size: 25px;
+	text-align: center;
+	font-weight: bolder;
+
+}
+
+.bestScore{
+	text-align: left;
+	font-size: 18px;
+	font-weight: bolder;
+	width: 280px;
+	border-bottom: 1px solid #fff;
+	padding: 0px 10px 10px;
+}
+
+.player{
+	float: left;
+	width: 190px;
+	margin: 5px 5px 0px 5px;
+	font-weight: bolder;
+}
+
+.score{
+	float: right;
+	width: 95px;
+	margin: 5px 5px 0px 0px;
+	font-weight: bolder;
+}
+
+#restart{
+	width: 100%;
+	height: 50px;
+	text-align: center;
+	background: #fac;
 }
