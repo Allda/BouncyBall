@@ -373,7 +373,6 @@ function Ball(x, y, size){
 
 }
     $(document).ready(function(){
-        console.log($('#restart').html());
         $("#history").hide();
         $(".showSc").hide();
         $(".showH").show();
@@ -395,16 +394,23 @@ function Ball(x, y, size){
         });
 
         $("#restart").click(function(){
-            console.log("Restart");
-            var data = {'nick':$("#inputScore").val(),'score':game.score};
-            if(data['nick'] == ""){
-                data['nick'] = 'Anonymous';
-            }
-            console.log(data);
-            $.get("score.php",data).done(function(data){
+            var clientIP = '';
+            
+            $.getJSON("clientInfo.php",function(d){
+                var data = {'nick':$("#inputScore").val(),'score':game.score};
+                data['ip'] = d['ip'];
+                data['resolution'] = window.screen.width + "x" + window.screen.height;
+
+                if(data['nick'] == ""){
+                    data['nick'] = 'Anonymous';
+                }
                 console.log(data);
-                console.log('response');
+                $.get("score.php",data).done(function(data){
+                    console.log(data);
+                    console.log('response');
+                });
             });
+
             $("#score").fadeOut('slow');
             game.restart();
         });

@@ -2,15 +2,15 @@
 
 
 
-$localhost = '127.0.0.1';
+$localhost = '127.0.1.1';
 
-$eva = '83.240.126.102';
+$eva = '147.229.176.14';
 
 if($_SERVER['SERVER_ADDR'] == $localhost){
     $host = 'localhost';
 	$dbName = 'root';
 	$password = '';
-	$db = 'bouncyBall';
+	$db = 'BouncyBall';
 }
 else if($_SERVER['SERVER_ADDR'] == $eva){
 	$host = 'localhost:/var/run/mysql/mysql.sock';
@@ -18,7 +18,6 @@ else if($_SERVER['SERVER_ADDR'] == $eva){
 	$password = 'j2fojtar';
 	$db = 'xraszk03';
 }
-
 
 
 $link = mysql_connect($host,$dbName,$password) or die("Error");
@@ -29,7 +28,7 @@ mysql_select_db($db, $link) or die('Could not select database.');
 
 
 if(isset($_GET['score'])){
-	$sql = "insert into Score (nick, score) values ('" . $_GET['nick'] . "','" . $_GET['score'] . "')";
+	$sql = "insert into Score (nick, score, ip, resolution) values ('" . $_GET['nick'] . "','" . $_GET['score'] . "','" . $_GET['ip'] ."','" . $_GET['resolution'] ."')";
 	$result = mysql_query($sql);
 	if (!$result) {
 	    echo "DB Error, could not list tables\n";
