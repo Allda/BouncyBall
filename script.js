@@ -397,7 +397,7 @@ function Ball(x, y, size){
             var clientIP = '';
             
             $.getJSON("clientInfo.php",function(d){
-                var data = {'nick':$("#inputScore").val(),'score':game.score};
+                var data = {'nick':$("#inputScore").val(),'score':$("#numScore").html()};
                 data['ip'] = d['ip'];
                 data['resolution'] = window.screen.width + "x" + window.screen.height;
 
