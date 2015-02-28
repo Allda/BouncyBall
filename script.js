@@ -59,7 +59,7 @@ function Game(){
 
     this.initializePads = function(){
         var last = 0;
-        for (var i = 0; i < 2; i++) {
+        for (var i = 0; i < 1; i++) {
             var dist = this.getRandomPadStep();
 
             var nPad = new Pad(Math.random()*(canv.width-100),last+dist);
@@ -115,15 +115,24 @@ function Game(){
             c.fillStyle = 'rgba(255,0,0,0.5)';
             c.fillRect(0, 0, canv.width, canv.height);
             this.resultBG = true;
+            $("#history").hide();
+            $("#myScore").show();
             $('#numScore').html(game.score);
+            $('#scoreTable').empty();
+            $(".showSc").hide();
+            $(".showH").show();
             $.getJSON("score.php",function(data){
                 var items = [];
                 if(data.length == 0){
-                    $(".players").append('<H2>Empty rank</H2>')
+                    $("#history").append('<H2>Empty rank</H2>')
                 }
                 else{
+                    $("#scoreTable").append('<tr id="header"><td>Rank</td><td>Nickname</td><td>Score</td></tr>');
+                        var i = 1;
                     data.forEach(function(val){
-                        $(".players").append('<div class="player">'+val['nick']+'</div> <div class="score">'+val['score']+'</div>');
+                        console.log(val)
+                        $("#scoreTable").append('<tr><td>'+i+'</td><td>'+val['nick']+'</td><td>'+val['score']+'</td>');
+                        i++;
                     });
                 }
                 /*$.each(data, function(key,val){
@@ -367,6 +376,7 @@ function Ball(x, y, size){
         console.log($('#restart').html());
         $("#history").hide();
         $(".showSc").hide();
+        $(".showH").show();
         var hist = false;
         $("#showHistory").click(function(){
             $("#myScore").slideToggle("slow");

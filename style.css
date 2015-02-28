@@ -72,6 +72,7 @@ table, th, td {
 
 table td{
 	padding: 5px; 
+	text-align: center;
 }
 
 tr:nth-child(even) {
@@ -96,6 +97,7 @@ input[type="text"] {
   width: 180px;
   margin-botom:3px; 
   border: none;
+  font-weight: bold;
   border-bottom: solid 2px #c9c9c9;
   transition: border 0.3s;
   float: right;

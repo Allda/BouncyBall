@@ -1,13 +1,29 @@
 <?php
 
+print_r($_SERVER);
 
-$host = 'localhost';
-$dbName = 'root';
-$password = '';
+$localhost = '127.0.0.1';
+
+$eva = '83.240.126.102';
+
+if($_SERVER['SERVER_ADDR'] == $localhost){
+    $host = 'localhost';
+	$dbName = 'root';
+	$password = '';
+	$db = 'bouncyBall'
+}
+else if($_SERVER['SERVER_ADDR'] == $eva){
+	$host = 'localhost:/var/run/mysql/mysql.sock';
+	$dbName = 'xraszk03';
+	$password = 'j2fojtar';
+	$db = 'xraszk03';
+}
+
+
 
 $link = mysql_connect($host,$dbName,$password) or die("Error");
 mysql_set_charset('utf8', $link);
-mysql_select_db('BouncyBall', $link) or die('Could not select database.');
+mysql_select_db($db, $link) or die('Could not select database.');
 
 
 
