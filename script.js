@@ -134,7 +134,6 @@ function Game(){
     this.isInTouch = function(star, ball){
         if((ball.x + ball.size) > star.x && ball.x < (star.x + star.size)){
             if((ball.y + ball.size) > star.y && ball.y < (star.y + star.size)){
-                console.log("InRow")
                 return true;
             }
         }
@@ -167,7 +166,6 @@ function Game(){
                     $("#scoreTable").append('<tr id="header"><td>Rank</td><td>Nickname</td><td>Score</td></tr>');
                         var i = 1;
                     data.forEach(function(val){
-                        console.log(val)
                         $("#scoreTable").append('<tr><td>'+i+'</td><td>'+val['nick']+'</td><td>'+val['score']+'</td>');
                         i++;
                     });
@@ -238,6 +236,7 @@ function Pad(x, y, broken){
 
     this.damage = 1;
     this.broken = broken;
+    this.opacity = 0.5;
 
     this.draw = function(offset){
         c.beginPath();
@@ -245,16 +244,18 @@ function Pad(x, y, broken){
         c.closePath();
         c.fillStyle = this.getColor();
         c.fill();
+        if(this.opacity != 1)
+            this.opacity += 0.01;
 
     }
 
     this.getColor = function(){
         if(this.damage == 0)
-            return 'rgba(150,150,150,1)';
+            return 'rgba(150,150,150,'+this.opacity+')';
         else if(this.damage == 1)
-            return 'rgba(0,0,0,1)';
+            return 'rgba(0,0,0,'+this.opacity+')';
         else
-            return 'rgba(0,0,0,1)';
+            return 'rgba(0,0,0,'+this.opacity+')';
     }
 
 }
@@ -374,7 +375,6 @@ function Ball(x, y, size){
             for (var i = 0; i < pads.length; i++) {
                 var p = pads[i];
                 if(this.x + this.size > p.x && this.x < p.x + p.width){
-                    //console.log('yes');
                     if(this.y < p.y +p.height && this.y  > p.y){
                         this.vy = this.originalvy;
                         this.state = 'rotate';
@@ -491,7 +491,6 @@ function Ball(x, y, size){
                 if(data['nick'] == ""){
                     data['nick'] = 'Anonymous';
                 }
-                console.log(data);
                 $.get("score.php",data).done(function(data){
                     console.log(data);
                     console.log('response');
