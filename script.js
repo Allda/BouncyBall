@@ -95,10 +95,14 @@ function Game(){
         };
 
         this.ball.draw();
+        c.save();
+        c.font = "30px Helvetica";
+        c.scale(1,-1);
+        c.translate(0,-canv.height); 
+        c.fillStyle = "#000";
+        c.fillText('Score: '+this.score.toString(),10,50);
+        c.restore();
 
-        /*c.font = "30px Helvetica";
-
-        c.fillText('Score: '+this.score.toString(),10,50);*/
     }
 
     this.countMovePerFrame = function(offset, animationOffset){
@@ -111,8 +115,25 @@ function Game(){
             c.fillStyle = 'rgba(255,0,0,0.5)';
             c.fillRect(0, 0, canv.width, canv.height);
             this.resultBG = true;
+            $(".players").empty();
+            $.getJSON("score.php",function(data){
+                var items = [];
+                if(data.length == 0){
+                    $(".players").append('<H2>Empty rank</H2>')
+                }
+                else{
+                    data.forEach(function(val){
+                        $(".players").append('<div class="player">'+val['nick']+'</div> <div class="score">'+val['score']+'</div>');
+                    });
+                }
+                /*$.each(data, function(key,val){
+                    console.log(key,val + "......");
+                    $(".players").append('<div class="player">'+data['nick']+'</div> <div class="score">'+data['score']+'</div>');
+                });*/
+            });
             //$("#score").fadeToggle('slow');
-            $(".players").append('<div class="player">Ales</div> <div class="score">150</div>');
+            
+            
 
         }
     }
@@ -348,6 +369,12 @@ function Ball(x, y, size){
         console.log($('#restart').html());
         $("#restart").click(function(){
             console.log("Restart");
+            var data = {'nick':$("#inputScore").val(),'score':game.score};
+            console.log(data);
+            $.get("score.php",data).done(function(data){
+                console.log(data);
+                console.log('response');
+            });
             $("#score").fadeOut('slow');
             game.restart();
         });
