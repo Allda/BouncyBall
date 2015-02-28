@@ -1,6 +1,6 @@
 <?php
 
-print_r($_SERVER);
+
 
 $localhost = '127.0.0.1';
 
@@ -10,7 +10,7 @@ if($_SERVER['SERVER_ADDR'] == $localhost){
     $host = 'localhost';
 	$dbName = 'root';
 	$password = '';
-	$db = 'bouncyBall'
+	$db = 'bouncyBall';
 }
 else if($_SERVER['SERVER_ADDR'] == $eva){
 	$host = 'localhost:/var/run/mysql/mysql.sock';
