@@ -56,6 +56,7 @@ function Game(){
     this.pads = [];
     this.gameStatus = 'playing';
     this.resultBG = false;
+    this.stars = [new Star(100,100)];
 
     this.initializePads = function(){
         var last = 0;
@@ -76,6 +77,11 @@ function Game(){
 
     this.update = function(){
         this.ball.update();
+        for (var i = 0; i < this.stars.length; i++) {
+            this.stars[i].update();
+            this.stars[i].bounce();
+        };
+        this.colide();
         if(this.ball.bounce(this.pads) == 'gameOver')
             this.gameStatus = 'gameOver';
 
@@ -95,6 +101,9 @@ function Game(){
         };
 
         this.ball.draw();
+        for (var i = 0; i < this.stars.length; i++) {
+            this.stars[i].draw();
+        };
         c.save();
         c.font = "30px Helvetica";
         c.scale(1,-1);
@@ -108,6 +117,34 @@ function Game(){
     this.countMovePerFrame = function(offset, animationOffset){
         var diff = this.offset - this.animationOffset;
         return diff * 0.05; // 5% of difference betwen real offset and shown offset
+    }
+
+    this.colide = function(){
+        for(var i = 0; i < this.stars.length; i++){
+            if(this.isInTouch(this.stars[i], this.ball)){
+                game.score += 5;
+                var index = this.stars.indexOf(this.stars[i]);
+                if(index > -1){
+                    this.stars.splice(index,1);
+                }
+            }
+        }
+    }
+
+    this.isInTouch = function(star, ball){
+        if((ball.x + ball.size) > star.x && ball.x < (star.x + star.size)){
+            if((ball.y + ball.size) > star.y && ball.y < (star.y + star.size)){
+                console.log("InRow")
+                return true;
+            }
+        }
+        return false;
+    }
+
+    this.generateNewStar = function(){
+        var x = Math.random() * (canv.width-26);
+        var y = game.offset + Math.random()*300+800;
+        this.stars.push(new Star(x,y));
     }
 
     this.drawResult = function(){
@@ -222,6 +259,52 @@ function Pad(x, y, broken){
 
 }
 
+function Star(x, y){
+    this.x = x;
+    this.y = y;
+    this.vx = Math.random()  * getRandomNegative();
+    this.vy = Math.random()  * getRandomNegative();
+    this.texture = new Image();
+    this.texture.src = 'img/star-red.png';
+    this.angle = 0;
+    this.size = 26;
+
+    this.draw = function(offset){
+        c.save();
+        c.translate(this.x + this.size/2,this.y- game.animationOffset +this.size/2);
+        c.rotate(this.angle*Math.PI/180);
+        c.translate(-(this.x + this.size/2),-(this.y- game.animationOffset +this.size/2));
+
+        c.drawImage(this.texture, this.x, this.y - game.animationOffset);
+        c.closePath();
+        c.restore();
+        this.angle++;
+    }
+
+    this.update = function(){
+        this.x += this.vx;
+        this.y += this.vy;
+    }
+
+    this.bounce = function(){
+        if(this.x < 0){
+            this.vx *= -1;
+            this.x = 0;
+        }
+        else if(this.x + this.size > canv.width){
+            this.vx *= -1;
+            this.x = canv.width - this.size;
+        }
+    }
+}
+
+function getRandomNegative(){
+    if(Math.random() > 0.5)
+        return 1;
+    else
+        return -1;
+}
+
 function Ball(x, y, size){
     this.x = x;
     this.y = y;
@@ -327,6 +410,10 @@ function Ball(x, y, size){
                             if(game.pads.length > 15)
                                 game.pads.shift();
                             game.score++;
+
+                            if(Math.random() > 0.9){
+                                game.generateNewStar();
+                            }
 
                         }
                     }
