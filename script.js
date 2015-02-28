@@ -115,7 +115,7 @@ function Game(){
             c.fillStyle = 'rgba(255,0,0,0.5)';
             c.fillRect(0, 0, canv.width, canv.height);
             this.resultBG = true;
-            $(".players").empty();
+            $('#numScore').html(game.score);
             $.getJSON("score.php",function(data){
                 var items = [];
                 if(data.length == 0){
@@ -168,8 +168,6 @@ function mouseListener(e){
     else if(code === 39){
         game.ball.moveRight()
     }
-    else
-        game.restart();
     
 
 }
@@ -367,9 +365,31 @@ function Ball(x, y, size){
 }
     $(document).ready(function(){
         console.log($('#restart').html());
+        $("#history").hide();
+        $(".showSc").hide();
+        var hist = false;
+        $("#showHistory").click(function(){
+            $("#myScore").slideToggle("slow");
+            $("#history").slideToggle("slow");
+            if(!$(".showH").is(":visible")){
+                $(".showSc").fadeToggle('slow', function() {
+                    $(".showH").fadeToggle('slow');
+                });
+            }
+            else{
+                $(".showH").fadeToggle('slow', function() {
+                    $(".showSc").fadeToggle('slow');
+                });
+            }
+
+        });
+
         $("#restart").click(function(){
             console.log("Restart");
             var data = {'nick':$("#inputScore").val(),'score':game.score};
+            if(data['nick'] == ""){
+                data['nick'] = 'Anonymous';
+            }
             console.log(data);
             $.get("score.php",data).done(function(data){
                 console.log(data);
