@@ -56,7 +56,7 @@ function Game(){
     this.pads = [];
     this.gameStatus = 'playing';
     this.resultBG = false;
-    this.stars = [new Star(100,100)];
+    this.stars = [new Star(100,100,false)];
 
     this.initializePads = function(){
         var last = 0;
@@ -104,14 +104,20 @@ function Game(){
         for (var i = 0; i < this.stars.length; i++) {
             this.stars[i].draw();
         };
+        this.drawScore();
+
+    }
+
+    this.drawScore = function(){
         c.save();
         c.font = "30px Helvetica";
         c.scale(1,-1);
         c.translate(0,-canv.height); 
         c.fillStyle = "#000";
         c.fillText('Score: '+this.score.toString(),10,50);
-        c.restore();
+        c.fillText('Height: '+(parseInt(this.animationOffset/30,10)).toString(),220,50);
 
+        c.restore();
     }
 
     this.countMovePerFrame = function(offset, animationOffset){
@@ -123,10 +129,21 @@ function Game(){
         for(var i = 0; i < this.stars.length; i++){
             if(this.isInTouch(this.stars[i], this.ball)){
                 game.score += 5;
+                
+                if(this.stars[i].bonus){
+                    if(this.ball.movingState != 'speedUp'){
+                        this.ball.movingState = 'speedUp'
+                        this.ball.vy = 32;   
+                        for(var j = 0; j < 7; j++)
+                            game.generateNewPad();
+                    }
+                }
+
                 var index = this.stars.indexOf(this.stars[i]);
                 if(index > -1){
                     this.stars.splice(index,1);
                 }
+
             }
         }
     }
@@ -143,7 +160,17 @@ function Game(){
     this.generateNewStar = function(){
         var x = Math.random() * (canv.width-26);
         var y = game.offset + Math.random()*300+800;
-        this.stars.push(new Star(x,y));
+        this.stars.push(new Star(x,y,true));
+    }
+
+    this.generateNewPad = function(){
+        var lastPad = this.pads.last();
+        var nPadStep = this.getRandomPadStep();
+        var broken = false;
+        if(Math.random() > 0.8)
+            broken = true
+        var nPad = new Pad(Math.random()*(canv.width-100),lastPad.y+nPadStep, broken);
+        game.pads.push(nPad);
     }
 
     this.drawResult = function(){
@@ -260,7 +287,7 @@ function Pad(x, y, broken){
 
 }
 
-function Star(x, y){
+function Star(x, y, bonus){
     this.x = x;
     this.y = y;
     this.vx = Math.random()  * getRandomNegative();
@@ -269,6 +296,9 @@ function Star(x, y){
     this.texture.src = 'img/star-red.png';
     this.angle = 0;
     this.size = 26;
+    this.bonus = bonus;
+    if(bonus)
+        this.texture.src = 'img/star-bonus.gif';
 
     this.draw = function(offset){
         c.save();
@@ -313,6 +343,7 @@ function Ball(x, y, size){
     this.vy = 0;
     this.size = size
     this.state = 'normal';
+    this.movingState = 'normal';
     //this.radius = radius;
     this.gravity = -0.25;
     this.dampening = 0.99;
@@ -399,27 +430,32 @@ function Ball(x, y, size){
                         }
 
                         if(!game.pads[i].steped){
-                            var lastPad = game.pads.last();
-                            var nPadStep = game.getRandomPadStep();
-                            var broken = false;
-                            if(Math.random() > 0.8)
-                                broken = true
-                            var nPad = new Pad(Math.random()*(canv.width-100),lastPad.y+nPadStep, broken);
-                            game.pads.push(nPad);
+                            var p = game.pads.last();
+                            if(game.pads[i] == p)
+                                game.generateNewPad();
                             game.pads[i].steped = true;
                             if(game.pads.length > 15)
                                 game.pads.shift();
                             game.score++;
 
-                            if(Math.random() > 0.9){
+                            if(Math.random() > 0.3){
                                 game.generateNewStar();
                             }
 
                         }
                     }
                 }
-            };
+            }
 
+        }
+        if(this.movingState == 'speedUp'){
+            if(this.vy < 0){
+                this.movingState = 'normal';
+
+            }
+            else{
+                game.offset = this.y - 200;
+            }
         }
     }
 

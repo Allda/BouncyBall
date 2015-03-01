@@ -141,7 +141,7 @@ input[type="text"].focus {
 	height: 32px;
 	margin-top: 10px;
 	text-align: center;
-	background: #17FF36;
+	background: #17DD36;
 	padding: 5px;
 	float:right;
 	margin-right: 30px;
@@ -152,6 +152,10 @@ input[type="text"].focus {
 
 #restart:hover{
 	background-color: #17CC36;
+}
+
+#restart:active{
+	background-color: #17FF36;
 }
 
 p{
